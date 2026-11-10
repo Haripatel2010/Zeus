@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import dev.chrisbanes.haze.HazeState
 import com.zeus.discipline.components.LiquidGlassBackground
 import com.zeus.discipline.components.LiquidGlassCard
+import com.zeus.discipline.reminders.ReminderEntry
 import com.zeus.discipline.theme.ZeusTheme
 import org.json.JSONArray
 import org.json.JSONObject
@@ -40,7 +41,10 @@ class MainActivity : ComponentActivity() {
         window.statusBarColor = android.graphics.Color.rgb(5, 5, 5)
         window.navigationBarColor = android.graphics.Color.rgb(5, 5, 5)
 
-        val prefs = getSharedPreferences("zeus_profile", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences(
+            "zeus_profile",
+            Context.MODE_PRIVATE
+        )
 
         setContent {
             ZeusTheme {
@@ -62,7 +66,9 @@ fun ZeusApp(prefs: android.content.SharedPreferences) {
         mutableStateOf(if (profileSaved) "home" else "onboarding")
     }
 
-    var tasks by remember { mutableStateOf(loadZeusTasks(prefs)) }
+    var tasks by remember {
+        mutableStateOf(loadZeusTasks(prefs))
+    }
 
     var waterCount by remember {
         mutableIntStateOf(prefs.getInt("water_count", 0))
@@ -103,21 +109,53 @@ fun ZeusApp(prefs: android.content.SharedPreferences) {
                     waterCount = waterCount,
                     onWaterAdd = {
                         waterCount = (waterCount + 1).coerceAtMost(8)
-                        prefs.edit().putInt("water_count", waterCount).apply()
+                        prefs.edit()
+                            .putInt("water_count", waterCount)
+                            .apply()
                     },
                     onTasksChange = {
                         tasks = it
                         saveZeusTasks(prefs, tasks)
                     },
-                    onProfile = { screen = "profile" }
+                    onProfile = {
+                        screen = "profile"
+                    },
+                    onReminders = {
+                        screen = "reminders"
+                    }
                 )
 
                 "profile" -> ProfileScreen(
                     hazeState = hazeState,
                     prefs = prefs,
-                    onBack = { screen = "home" },
-                    onEdit = { screen = "onboarding" }
+                    onBack = {
+                        screen = "home"
+                    },
+                    onEdit = {
+                        screen = "onboarding"
+                    }
                 )
+
+                "reminders" -> Column(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    TextButton(
+                        onClick = {
+                            screen = "home"
+                        }
+                    ) {
+                        Text(
+                            "← BACK TO HOME",
+                            color = Color.White
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        ReminderEntry()
+                    }
+                }
             }
         }
     }
@@ -129,7 +167,10 @@ fun OnboardingScreen(
     prefs: android.content.SharedPreferences,
     onContinue: () -> Unit
 ) {
-    var name by remember { mutableStateOf(prefs.getString("full_name", "") ?: "") }
+    var name by remember {
+        mutableStateOf(prefs.getString("full_name", "") ?: "")
+    }
+
     var height by remember {
         mutableStateOf(
             if (prefs.contains("height_cm"))
@@ -137,6 +178,7 @@ fun OnboardingScreen(
             else ""
         )
     }
+
     var weight by remember {
         mutableStateOf(
             if (prefs.contains("weight_kg"))
@@ -144,7 +186,10 @@ fun OnboardingScreen(
             else ""
         )
     }
-    var gender by remember { mutableStateOf(prefs.getString("gender", "Male") ?: "Male") }
+
+    var gender by remember {
+        mutableStateOf(prefs.getString("gender", "Male") ?: "Male")
+    }
 
     Column(
         modifier = Modifier
@@ -154,29 +199,81 @@ fun OnboardingScreen(
     ) {
         Spacer(Modifier.height(18.dp))
 
-        Text("ZEUS", fontSize = 38.sp, fontWeight = FontWeight.Bold, color = Color.White)
-        Text("DISCIPLINE IS POWER", fontSize = 12.sp, color = Color.LightGray)
+        Text(
+            "ZEUS",
+            fontSize = 38.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+
+        Text(
+            "DISCIPLINE IS POWER",
+            fontSize = 12.sp,
+            color = Color.LightGray
+        )
 
         Spacer(Modifier.height(30.dp))
 
-        LiquidGlassCard(hazeState, Modifier.fillMaxWidth()) {
+        LiquidGlassCard(
+            hazeState,
+            Modifier.fillMaxWidth()
+        ) {
             Column(Modifier.padding(20.dp)) {
-                Text("Let's get to know you.", fontSize = 25.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text(
+                    "Let's get to know you.",
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+
                 Spacer(Modifier.height(8.dp))
-                Text("Your journey starts with a personal profile.", color = Color.LightGray)
+
+                Text(
+                    "Your journey starts with a personal profile.",
+                    color = Color.LightGray
+                )
             }
         }
 
         Spacer(Modifier.height(26.dp))
 
-        GlassInput("FULL NAME", name, { name = it }, "Enter your full name", KeyboardType.Text)
-        GlassInput("HEIGHT (CM)", height, { height = it }, "Height in centimetres", KeyboardType.Decimal)
-        GlassInput("WEIGHT (KG)", weight, { weight = it }, "Weight in kilograms", KeyboardType.Decimal)
+        GlassInput(
+            "FULL NAME",
+            name,
+            { name = it },
+            "Enter your full name",
+            KeyboardType.Text
+        )
+
+        GlassInput(
+            "HEIGHT (CM)",
+            height,
+            { height = it },
+            "Height in centimetres",
+            KeyboardType.Decimal
+        )
+
+        GlassInput(
+            "WEIGHT (KG)",
+            weight,
+            { weight = it },
+            "Weight in kilograms",
+            KeyboardType.Decimal
+        )
 
         Spacer(Modifier.height(12.dp))
-        Text("GENDER", color = Color.LightGray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
 
-        LiquidGlassCard(hazeState, Modifier.fillMaxWidth()) {
+        Text(
+            "GENDER",
+            color = Color.LightGray,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        LiquidGlassCard(
+            hazeState,
+            Modifier.fillMaxWidth()
+        ) {
             Column(Modifier.padding(12.dp)) {
                 listOf("Male", "Female", "Other").forEach { option ->
                     Row(
@@ -184,13 +281,19 @@ fun OnboardingScreen(
                     ) {
                         RadioButton(
                             selected = gender == option,
-                            onClick = { gender = option },
+                            onClick = {
+                                gender = option
+                            },
                             colors = RadioButtonDefaults.colors(
                                 selectedColor = Color.White,
                                 unselectedColor = Color.Gray
                             )
                         )
-                        Text(option, color = Color.White)
+
+                        Text(
+                            option,
+                            color = Color.White
+                        )
                     }
                 }
             }
@@ -219,18 +322,29 @@ fun OnboardingScreen(
 
                 onContinue()
             },
-            modifier = Modifier.fillMaxWidth().height(55.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(55.dp),
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.White,
                 contentColor = Color.Black
             )
         ) {
-            Text("CONTINUE  →", fontWeight = FontWeight.Bold)
+            Text(
+                "CONTINUE  →",
+                fontWeight = FontWeight.Bold
+            )
         }
 
         Spacer(Modifier.height(15.dp))
-        Text("Your profile is saved locally on this device.", color = Color.Gray, fontSize = 12.sp)
+
+        Text(
+            "Your profile is saved locally on this device.",
+            color = Color.Gray,
+            fontSize = 12.sp
+        )
+
         Spacer(Modifier.height(25.dp))
     }
 }
@@ -243,7 +357,8 @@ fun HomeScreen(
     waterCount: Int,
     onWaterAdd: () -> Unit,
     onTasksChange: (List<ZeusTask>) -> Unit,
-    onProfile: () -> Unit
+    onProfile: () -> Unit,
+    onReminders: () -> Unit
 ) {
     val name = prefs.getString("full_name", "User") ?: "User"
 
@@ -255,62 +370,130 @@ fun HomeScreen(
     ) {
         Spacer(Modifier.height(12.dp))
 
-        Text("ZEUS", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(
+            "ZEUS",
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
 
         Spacer(Modifier.height(22.dp))
 
-        Text("Welcome, $name 👋", fontSize = 25.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(
+            "Welcome, $name 👋",
+            fontSize = 25.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+
         Spacer(Modifier.height(6.dp))
-        Text("What's the plan today?", fontSize = 14.sp, color = Color.LightGray)
+
+        Text(
+            "What's the plan today?",
+            fontSize = 14.sp,
+            color = Color.LightGray
+        )
 
         Spacer(Modifier.height(24.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            LiquidGlassCard(hazeState, Modifier.weight(1f)) {
+            LiquidGlassCard(
+                hazeState,
+                Modifier.weight(1f)
+            ) {
                 Column(Modifier.padding(14.dp)) {
-                    Text("WATER INTAKE", fontSize = 11.sp, color = Color.LightGray)
+                    Text(
+                        "WATER INTAKE",
+                        fontSize = 11.sp,
+                        color = Color.LightGray
+                    )
+
                     Spacer(Modifier.height(12.dp))
-                    Text("$waterCount / 8", fontSize = 25.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                    Text("GLASSES", fontSize = 11.sp, color = Color.Gray)
+
+                    Text(
+                        "$waterCount / 8",
+                        fontSize = 25.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+
+                    Text(
+                        "GLASSES",
+                        fontSize = 11.sp,
+                        color = Color.Gray
+                    )
+
                     Spacer(Modifier.height(12.dp))
+
                     OutlinedButton(
                         onClick = onWaterAdd,
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = Color.White
+                        )
                     ) {
                         Text("+ ADD")
                     }
                 }
             }
 
-            LiquidGlassCard(hazeState, Modifier.weight(1f)) {
+            LiquidGlassCard(
+                hazeState,
+                Modifier.weight(1f)
+            ) {
                 Column(Modifier.padding(14.dp)) {
-                    Text("PENDING TASKS", fontSize = 11.sp, color = Color.LightGray)
+                    Text(
+                        "PENDING TASKS",
+                        fontSize = 11.sp,
+                        color = Color.LightGray
+                    )
+
                     Spacer(Modifier.height(12.dp))
+
                     Text(
                         tasks.count { !it.completed }.toString(),
                         fontSize = 30.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
+
                     Spacer(Modifier.height(12.dp))
-                    Text("Keep going.", fontSize = 12.sp, color = Color.Gray)
+
+                    Text(
+                        "Keep going.",
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
                 }
             }
         }
 
         Spacer(Modifier.height(28.dp))
 
-        Text("TODAY'S TASKS", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(
+            "TODAY'S TASKS",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+
         Spacer(Modifier.height(12.dp))
 
-        var newTask by remember { mutableStateOf("") }
+        var newTask by remember {
+            mutableStateOf("")
+        }
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             OutlinedTextField(
                 value = newTask,
-                onValueChange = { newTask = it },
-                placeholder = { Text("Add a new task...") },
+                onValueChange = {
+                    newTask = it
+                },
+                placeholder = {
+                    Text("Add a new task...")
+                },
                 singleLine = true,
                 modifier = Modifier.weight(1f),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -330,7 +513,10 @@ fun HomeScreen(
                 onClick = {
                     if (newTask.isNotBlank()) {
                         onTasksChange(
-                            tasks + ZeusTask(System.currentTimeMillis(), newTask.trim())
+                            tasks + ZeusTask(
+                                System.currentTimeMillis(),
+                                newTask.trim()
+                            )
                         )
                         newTask = ""
                     }
@@ -346,10 +532,16 @@ fun HomeScreen(
 
         Spacer(Modifier.height(14.dp))
 
-        LiquidGlassCard(hazeState, Modifier.fillMaxWidth()) {
+        LiquidGlassCard(
+            hazeState,
+            Modifier.fillMaxWidth()
+        ) {
             Column(Modifier.padding(12.dp)) {
                 if (tasks.isEmpty()) {
-                    Text("No tasks yet. Add your first task above.", color = Color.LightGray)
+                    Text(
+                        "No tasks yet. Add your first task above.",
+                        color = Color.LightGray
+                    )
                 } else {
                     tasks.forEach { task ->
                         Row(
@@ -361,7 +553,9 @@ fun HomeScreen(
                                 onCheckedChange = { checked ->
                                     onTasksChange(
                                         tasks.map {
-                                            if (it.id == task.id) it.copy(completed = checked) else it
+                                            if (it.id == task.id)
+                                                it.copy(completed = checked)
+                                            else it
                                         }
                                     )
                                 },
@@ -375,15 +569,26 @@ fun HomeScreen(
                             Text(
                                 task.title,
                                 modifier = Modifier.weight(1f),
-                                color = if (task.completed) Color.Gray else Color.White
+                                color = if (task.completed)
+                                    Color.Gray
+                                else
+                                    Color.White
                             )
 
                             TextButton(
                                 onClick = {
-                                    onTasksChange(tasks.filterNot { it.id == task.id })
+                                    onTasksChange(
+                                        tasks.filterNot {
+                                            it.id == task.id
+                                        }
+                                    )
                                 }
                             ) {
-                                Text("×", color = Color.White, fontSize = 20.sp)
+                                Text(
+                                    "×",
+                                    color = Color.White,
+                                    fontSize = 20.sp
+                                )
                             }
                         }
                     }
@@ -393,14 +598,34 @@ fun HomeScreen(
 
         Spacer(Modifier.height(28.dp))
 
-        Text("SOMETHING NEW", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(
+            "SOMETHING NEW",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+
         Spacer(Modifier.height(12.dp))
 
-        LiquidGlassCard(hazeState, Modifier.fillMaxWidth()) {
+        LiquidGlassCard(
+            hazeState,
+            Modifier.fillMaxWidth()
+        ) {
             Column(Modifier.padding(18.dp)) {
-                Text("Your next challenge awaits.", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text(
+                    "Your next challenge awaits.",
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+
                 Spacer(Modifier.height(8.dp))
-                Text("Stay curious. Learn something every day.", color = Color.LightGray, fontSize = 13.sp)
+
+                Text(
+                    "Stay curious. Learn something every day.",
+                    color = Color.LightGray,
+                    fontSize = 13.sp
+                )
             }
         }
 
@@ -409,9 +634,23 @@ fun HomeScreen(
         OutlinedButton(
             onClick = onProfile,
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = Color.White
+            )
         ) {
             Text("MY PROFILE")
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        OutlinedButton(
+            onClick = onReminders,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = Color.White
+            )
+        ) {
+            Text("MY REMINDERS")
         }
 
         Spacer(Modifier.height(30.dp))
@@ -431,111 +670,17 @@ fun ProfileScreen(
             .verticalScroll(rememberScrollState())
             .padding(24.dp)
     ) {
-        Text("MY PROFILE", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(
+            "MY PROFILE",
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
 
         Spacer(Modifier.height(24.dp))
 
-        LiquidGlassCard(hazeState, Modifier.fillMaxWidth()) {
+        LiquidGlassCard(
+            hazeState,
+            Modifier.fillMaxWidth()
+        ) {
             Column(Modifier.padding(20.dp)) {
-                Text(prefs.getString("full_name", "") ?: "", fontSize = 23.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                Spacer(Modifier.height(18.dp))
-                Text("HEIGHT  •  ${prefs.getFloat("height_cm", 0f)} cm", color = Color.LightGray)
-                Spacer(Modifier.height(14.dp))
-                Text("WEIGHT  •  ${prefs.getFloat("weight_kg", 0f)} kg", color = Color.LightGray)
-                Spacer(Modifier.height(14.dp))
-                Text("GENDER  •  ${prefs.getString("gender", "Male")}", color = Color.LightGray)
-            }
-        }
-
-        Spacer(Modifier.height(22.dp))
-
-        Button(
-            onClick = onEdit,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
-        ) {
-            Text("EDIT PROFILE")
-        }
-
-        Spacer(Modifier.height(12.dp))
-
-        OutlinedButton(
-            onClick = onBack,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
-        ) {
-            Text("BACK TO HOME")
-        }
-    }
-}
-
-@Composable
-fun GlassInput(
-    title: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    hint: String,
-    keyboardType: KeyboardType
-) {
-    Text(title, color = Color.LightGray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-    Spacer(Modifier.height(7.dp))
-
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        placeholder = { Text(hint) },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-        modifier = Modifier.fillMaxWidth(),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White,
-            focusedBorderColor = Color.White,
-            unfocusedBorderColor = Color.Gray,
-            focusedPlaceholderColor = Color.Gray,
-            unfocusedPlaceholderColor = Color.Gray,
-            cursorColor = Color.White
-        )
-    )
-
-    Spacer(Modifier.height(18.dp))
-}
-
-fun loadZeusTasks(prefs: android.content.SharedPreferences): List<ZeusTask> {
-    val result = mutableListOf<ZeusTask>()
-
-    try {
-        val json = JSONArray(prefs.getString("tasks_json", "[]"))
-
-        for (i in 0 until json.length()) {
-            val item = json.getJSONObject(i)
-            result.add(
-                ZeusTask(
-                    item.getLong("id"),
-                    item.getString("title"),
-                    item.getBoolean("completed")
-                )
-            )
-        }
-    } catch (_: Exception) {
-    }
-
-    return result
-}
-
-fun saveZeusTasks(
-    prefs: android.content.SharedPreferences,
-    tasks: List<ZeusTask>
-) {
-    val json = JSONArray()
-
-    tasks.forEach {
-        val item = JSONObject()
-        item.put("id", it.id)
-        item.put("title", it.title)
-        item.put("completed", it.completed)
-        json.put(item)
-    }
-
-    prefs.edit().putString("tasks_json", json.toString()).apply()
-}
