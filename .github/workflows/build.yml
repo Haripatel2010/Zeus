@@ -1,57 +1,43 @@
-plugins {
-    id("com.android.application") version "8.7.3"
-    id("org.jetbrains.kotlin.android") version "2.1.0"
-    id("org.jetbrains.kotlin.plugin.compose") version "2.1.0"
-    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
-}
 
-android {
-    namespace = "com.zeus.discipline"
-    compileSdk = 35
+name: Build ZEUS APK
 
-    defaultConfig {
-        applicationId = "com.zeus.discipline"
-        minSdk = 26
-        targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
-    }
+on:
+  push:
+    branches:
+      - main
 
-    buildFeatures {
-        compose = true
-    }
+  workflow_dispatch:
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
+permissions:
+  contents: read
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-}
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
 
-dependencies {
-    implementation(platform("androidx.compose:compose-bom:2024.12.01"))
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    implementation("androidx.activity:activity-compose:1.9.3")
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
 
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
 
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.material:material-icons-extended")
+      - name: Build ZEUS APK
+        run: gradle assembleDebug --stacktrace
 
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
-
-    // Room database
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
-
-    // Liquid Glass
-    implementation("dev.chrisbanes.haze:haze:1.4.0")
-
-    debugImplementation("androidx.compose.ui:ui-tooling")
-}
+      - name: Upload ZEUS APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZEUS-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          
