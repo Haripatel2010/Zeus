@@ -26,19 +26,14 @@ abstract class ReminderDatabase : RoomDatabase() {
         private var INSTANCE: ReminderDatabase? = null
 
         fun getDatabase(context: Context): ReminderDatabase {
-
             return INSTANCE ?: synchronized(this) {
-
-                val instance = Room.databaseBuilder(
+                INSTANCE ?: Room.databaseBuilder(
                     context.applicationContext,
                     ReminderDatabase::class.java,
                     "zeus_reminders_database"
-                )
-                    .build()
-
-                INSTANCE = instance
-
-                instance
+                ).build().also {
+                    INSTANCE = it
+                }
             }
         }
     }
