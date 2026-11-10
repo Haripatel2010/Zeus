@@ -40,10 +40,7 @@ fun LiquidGlassCard(
     Box(
         modifier = modifier
             .clip(shape)
-            .hazeChild(
-                state = hazeState,
-                shape = shape
-            )
+            .hazeChild(state = hazeState)
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
@@ -66,3 +63,4 @@ fun LiquidGlassCard(
         content = content
     )
 }
+
