@@ -57,4 +57,5 @@ kapt("androidx.room:room-compiler:2.7.2")
     implementation("dev.chrisbanes.haze:haze:1.4.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
+implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
 }
