@@ -6,10 +6,15 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
-import android.view.Gravity
 import android.view.View
 import android.widget.*
 import android.text.InputType
+
+data class ZeusTask(
+    val id: Long,
+    val title: String,
+    val completed: Boolean = false
+)
 
 class MainActivity : Activity() {
 
@@ -62,7 +67,10 @@ class MainActivity : Activity() {
     }
 
     private fun addSpace(layout: LinearLayout, height: Int) {
-        layout.addView(View(this), LinearLayout.LayoutParams(1, dp(height)))
+        layout.addView(
+            View(this),
+            LinearLayout.LayoutParams(1, dp(height))
+        )
     }
 
     private fun addLabel(layout: LinearLayout, value: String) {
@@ -102,6 +110,7 @@ class MainActivity : Activity() {
 
         root.addView(text("Let's get to know you.", 25f, white, true))
         addSpace(root, 8)
+
         root.addView(text(
             "Create your personal profile to get started.",
             14f, muted
@@ -109,6 +118,7 @@ class MainActivity : Activity() {
         addSpace(root, 30)
 
         addLabel(root, "FULL NAME")
+
         val name = field(
             "Enter your full name",
             InputType.TYPE_CLASS_TEXT or
@@ -119,26 +129,32 @@ class MainActivity : Activity() {
         addSpace(root, 22)
 
         addLabel(root, "HEIGHT (CM)")
+
         val height = field(
             "Enter height in centimetres",
             InputType.TYPE_CLASS_NUMBER or
                 InputType.TYPE_NUMBER_FLAG_DECIMAL
         )
+
         if (prefs.contains("height_cm")) {
             height.setText(prefs.getFloat("height_cm", 0f).toString())
         }
+
         root.addView(height)
         addSpace(root, 22)
 
         addLabel(root, "WEIGHT (KG)")
+
         val weight = field(
             "Enter weight in kilograms",
             InputType.TYPE_CLASS_NUMBER or
                 InputType.TYPE_NUMBER_FLAG_DECIMAL
         )
+
         if (prefs.contains("weight_kg")) {
             weight.setText(prefs.getFloat("weight_kg", 0f).toString())
         }
+
         root.addView(weight)
         addSpace(root, 22)
 
@@ -178,6 +194,7 @@ class MainActivity : Activity() {
         root.addView(save)
 
         addSpace(root, 18)
+
         root.addView(text(
             "Your profile is stored privately on this device.",
             12f, muted
@@ -190,16 +207,19 @@ class MainActivity : Activity() {
 
             if (n.isEmpty()) {
                 name.error = "Enter your full name"
+                name.requestFocus()
                 return@setOnClickListener
             }
 
             if (h == null || h <= 0 || h > 300) {
                 height.error = "Enter a valid height"
+                height.requestFocus()
                 return@setOnClickListener
             }
 
             if (w == null || w <= 0 || w > 500) {
                 weight.error = "Enter a valid weight"
+                weight.requestFocus()
                 return@setOnClickListener
             }
 
@@ -250,6 +270,7 @@ class MainActivity : Activity() {
                 orientation = LinearLayout.VERTICAL
                 setPadding(dp(16), dp(18), dp(12), dp(18))
                 background = roundedBackground(card)
+
                 addView(text(title, 12f, muted, true))
                 addSpace(this, 10)
                 addView(text(value, 25f, white, true))
@@ -283,6 +304,7 @@ class MainActivity : Activity() {
 
             addView(text("No tasks added yet.", 15f, muted))
             addSpace(this, 8)
+
             addView(text(
                 "Your daily goals will appear here.",
                 12f, muted
@@ -304,7 +326,9 @@ class MainActivity : Activity() {
                 "Your next challenge awaits.",
                 16f, white, true
             ))
+
             addSpace(this, 8)
+
             addView(text(
                 "Stay curious. Learn something every day.",
                 13f, muted
