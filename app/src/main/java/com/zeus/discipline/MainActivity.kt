@@ -685,3 +685,152 @@ fun ProfileScreen(
             Modifier.fillMaxWidth()
         ) {
             Column(Modifier.padding(20.dp)) {
+                
+                Text(
+                    prefs.getString("full_name", "") ?: "",
+                    fontSize = 23.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+
+                Spacer(Modifier.height(18.dp))
+
+                Text(
+                    "HEIGHT • ${prefs.getFloat("height_cm", 0f)} cm",
+                    color = Color.LightGray
+                )
+
+                Spacer(Modifier.height(14.dp))
+
+                Text(
+                    "WEIGHT • ${prefs.getFloat("weight_kg", 0f)} kg",
+                    color = Color.LightGray
+                )
+
+                Spacer(Modifier.height(14.dp))
+
+                Text(
+                    "GENDER • ${prefs.getString("gender", "Male")}",
+                    color = Color.LightGray
+                )
+            }
+        }
+
+        Spacer(Modifier.height(22.dp))
+
+        Button(
+            onClick = onEdit,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.White,
+                contentColor = Color.Black
+            )
+        ) {
+            Text("EDIT PROFILE")
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        OutlinedButton(
+            onClick = onBack,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = Color.White
+            )
+        ) {
+            Text("BACK TO HOME")
+        }
+    }
+}
+
+@Composable
+fun GlassInput(
+    title: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    hint: String,
+    keyboardType: KeyboardType
+) {
+    Text(
+        title,
+        color = Color.LightGray,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Bold
+    )
+
+    Spacer(Modifier.height(7.dp))
+
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = { Text(hint) },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = keyboardType
+        ),
+        modifier = Modifier.fillMaxWidth(),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = Color.White,
+            unfocusedTextColor = Color.White,
+            focusedBorderColor = Color.White,
+            unfocusedBorderColor = Color.Gray,
+            focusedPlaceholderColor = Color.Gray,
+            unfocusedPlaceholderColor = Color.Gray,
+            cursorColor = Color.White
+        )
+    )
+
+    Spacer(Modifier.height(18.dp))
+}
+
+fun loadZeusTasks(
+    prefs: android.content.SharedPreferences
+): List<ZeusTask> {
+    val result = mutableListOf<ZeusTask>()
+
+    try {
+        val json = JSONArray(
+            prefs.getString("tasks_json", "[]")
+        )
+
+        for (i in 0 until json.length()) {
+            val item = json.getJSONObject(i)
+
+            result.add(
+                ZeusTask(
+                    item.getLong("id"),
+                    item.getString("title"),
+                    item.getBoolean("completed")
+                )
+            )
+        }
+    } catch (_: Exception) {
+    }
+
+    return result
+}
+
+fun saveZeusTasks(
+    prefs: android.content.SharedPreferences,
+    tasks: List<ZeusTask>
+) {
+    val json = JSONArray()
+
+    tasks.forEach {
+        val item = JSONObject()
+
+        item.put("id", it.id)
+        item.put("title", it.title)
+        item.put("completed", it.completed)
+
+        json.put(item)
+    }
+
+    prefs.edit()
+        .putString("tasks_json", json.toString())
+        .apply()
+}
+
+                
+
+                
