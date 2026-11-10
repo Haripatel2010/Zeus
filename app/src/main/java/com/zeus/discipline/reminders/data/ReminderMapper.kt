@@ -1,4 +1,3 @@
-
 package com.zeus.discipline.reminders.data
 
 import com.zeus.discipline.reminders.model.*
