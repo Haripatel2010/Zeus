@@ -3,6 +3,7 @@ plugins {
     id("com.android.application") version "8.7.3"
     id("org.jetbrains.kotlin.android") version "2.1.0"
     id("org.jetbrains.kotlin.plugin.compose") version "2.1.0"
+    id("org.jetbrains.kotlin.kapt") version "2.1.0"
 }
 
 android {
@@ -31,6 +32,10 @@ android {
     }
 }
 
+kapt {
+    correctErrorTypes = true
+}
+
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2024.12.01"))
 
@@ -47,8 +52,8 @@ dependencies {
 
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
 
-    // Liquid Glass backdrop blur
     implementation("dev.chrisbanes.haze:haze:1.4.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
